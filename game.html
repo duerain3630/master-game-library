@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Game Page</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0f0f14;
+        color: white;
+    }
+
+    header {
+        padding: 20px;
+        background: #1a1a24;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h1 {
+        margin-bottom: 5px;
+    }
+
+    .tag {
+        display: inline-block;
+        background: #2a2a3a;
+        padding: 5px 10px;
+        border-radius: 6px;
+        margin: 3px;
+        font-size: 14px;
+    }
+
+    .section {
+        margin-top: 20px;
+        padding: 15px;
+        background: #1f1f2b;
+        border-radius: 10px;
+    }
+
+    a {
+        color: #7ab7ff;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <a href="index.html">← Back Home</a>
+</header>
+
+<div class="container" id="content">
+    Loading game...
+</div>
+
+<script>
+let database = null;
+
+const params = new URLSearchParams(window.location.search);
+const gameId = params.get("id");
+
+fetch("database.json")
+    .then(res => res.json())
+    .then(data => {
+        database = data;
+        renderGame(gameId);
+    });
+
+function findById(list, id) {
+    return list.find(x => x.id === id);
+}
+
+function renderGame(id) {
+    const game = database.games.find(g => g.id === id);
+    const container = document.getElementById("content");
+
+    if (!game) {
+        container.innerHTML = "<h2>Game not found</h2>";
+        return;
+    }
+
+    const developer = database.developers.find(d => d.id === game.developer);
+    const publisher = database.publishers.find(p => p.id === game.publisher);
+    const franchise = database.franchises.find(f => f.id === game.franchise);
+    const genre = database.genres.find(g => g.id === game.genre);
+
+    const releases = database.releases.filter(r => r.game === game.id);
+
+    container.innerHTML = `
+        <h1>${game.title}</h1>
+
+        <div class="section">
+            <h3>Metadata</h3>
+            <p><strong>Developer:</strong> ${developer ? `<a href="#">${developer.name}</a>` : "Unknown"}</p>
+            <p><strong>Publisher:</strong> ${publisher ? `<a href="#">${publisher.name}</a>` : "Unknown"}</p>
+            <p><strong>Franchise:</strong> ${franchise ? `<a href="#">${franchise.name}</a>` : "None"}</p>
+            <p><strong>Genre:</strong> ${genre ? `<a href="#">${genre.name}</a>` : "Unknown"}</p>
+        </div>
+
+        <div class="section">
+            <h3>Platforms</h3>
+            <div class="grid">
+                ${game.platforms.map(p => `<div class="tag">${p}</div>`).join("")}
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Releases</h3>
+            <div class="grid">
+                ${releases.map(r => `
+                    <div class="tag">
+                        ${r.platform || "unknown"} - ${r.year || "?"}
+                    </div>
+                `).join("")}
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Related Games</h3>
+            ${getRelatedGames(game)}
+        </div>
+    `;
+}
+
+function getRelatedGames(game) {
+    const sameFranchise = database.games
+        .filter(g => g.franchise === game.franchise && g.id !== game.id)
+        .slice(0, 8);
+
+    if (sameFranchise.length === 0) {
+        return "<p>No related games found.</p>";
+    }
+
+    return `
+        <div class="grid">
+            ${sameFranchise.map(g => `
+                <div class="tag">
+                    <a href="game.html?id=${g.id}">${g.title}</a>
+                </div>
+            `).join("")}
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
