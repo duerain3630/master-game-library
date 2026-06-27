@@ -20,6 +20,27 @@ fetch("./database.json")
     const count = document.getElementById("itemCount");
     const list = document.getElementById("list");
 
+    const genreFilter = document.getElementById("genreFilter");
+    const developerFilter = document.getElementById("developerFilter");
+    const yearFilter = document.getElementById("yearFilter");
+
+    if (type === "games") {
+
+    const genres = new Set();
+    const devs = new Set();
+    const years = new Set();
+
+    database.games.forEach(g => {
+        if (g.genre) genres.add(g.genre);
+        if (g.developer) devs.add(g.developer);
+        if (g.year) years.add(g.year);
+    });
+
+    genres.forEach(g => genreFilter.innerHTML += `<option>${g}</option>`);
+    devs.forEach(d => developerFilter.innerHTML += `<option>${d}</option>`);
+    years.forEach(y => yearFilter.innerHTML += `<option>${y}</option>`);
+    }    
+    
     if (!database[type]) {
 
         title.textContent = "Not Found";
