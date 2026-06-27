@@ -21,6 +21,7 @@ const count = document.getElementById("itemCount");
 
 // Filters (only exist on games page)
 const genreFilter = document.getElementById("genreFilter");
+const publisherFilter = document.getElementById("publisherFilter");
 const developerFilter = document.getElementById("developerFilter");
 const yearFilter = document.getElementById("yearFilter");
 
@@ -65,20 +66,24 @@ function setupPage() {
 function setupFilters() {
 
     const genres = new Set();
+    const publishers = new Set();
     const devs = new Set();
     const years = new Set();
 
     database.games.forEach(g => {
         if (g.genre) genres.add(g.genre);
+        if (g.publisher) publishers.add(g.publisher);
         if (g.developer) devs.add(g.developer);
         if (g.year) years.add(g.year);
     });
 
     populateFilter(genreFilter, genres);
+    populateFilter(publisherFilter, publishers);
     populateFilter(developerFilter, devs);
     populateFilter(yearFilter, years);
 
     genreFilter.addEventListener("change", applyFilters);
+    publisherFilter.addEventListener("change", applyFilters);
     developerFilter.addEventListener("change", applyFilters);
     yearFilter.addEventListener("change", applyFilters);
 }
@@ -89,6 +94,7 @@ function setupFilters() {
 function applyFilters() {
 
     const genre = genreFilter.value;
+    const pub = publisherFilter.value;
     const dev = developerFilter.value;
     const year = yearFilter.value;
 
@@ -96,6 +102,7 @@ function applyFilters() {
 
         return (
             (genre === "all" || g.genre === genre) &&
+            (pub === "all" || g.publisher === pub) &&
             (dev === "all" || g.developer === dev) &&
             (year === "all" || g.year === year)
         );
