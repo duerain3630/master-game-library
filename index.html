@@ -29,7 +29,7 @@
         max-width: 600px;
         margin: auto;
     }
-    
+
     #searchInput {
         width: 100%;
         padding: 12px;
@@ -37,7 +37,7 @@
         border: none;
         font-size: 16px;
     }
-    
+
     .search-results {
         position: absolute;
         top: 45px;
@@ -49,17 +49,20 @@
         z-index: 1000;
         display: none;
     }
-    
+
     .search-item {
         padding: 10px;
         cursor: pointer;
         border-bottom: 1px solid #2a2a3a;
+        text-decoration: none;
+        color: white;
+        display: block;
     }
-    
+
     .search-item:hover {
         background: #2b2b3d;
     }
-    
+
     .search-category {
         font-size: 12px;
         opacity: 0.6;
@@ -109,24 +112,6 @@
         background: #2a2a3a;
         transform: translateY(-2px);
     }
-
-    #results {
-        max-width: 900px;
-        margin: auto;
-        padding: 10px;
-    }
-
-    .result-item {
-        background: #1f1f2b;
-        margin: 5px 0;
-        padding: 10px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .result-item:hover {
-        background: #2a2a3a;
-    }
 </style>
 </head>
 
@@ -134,12 +119,11 @@
 
 <header>
     <h1>🎮 Nico's Video Game Database</h1>
-    
-    <div class="search-wrapper">
-    <input id="searchInput" placeholder="Search games, developers, franchises..." />
-    <div id="searchResults" class="search-results"></div>
 
-</div>
+    <div class="search-wrapper">
+        <input id="searchInput" placeholder="Search games, developers, franchises..." />
+        <div id="searchResults" class="search-results"></div>
+    </div>
 </header>
 
 <div class="stats" id="stats"></div>
@@ -148,44 +132,27 @@
     <h2>Browse</h2>
 
     <div class="grid">
-        <div class="grid">
-        
-        <a class="card" href="browse.html?type=games">
-        🎮<br><br>Games
-        </a>
-        
-        <a class="card" href="browse.html?type=platforms">
-        🕹<br><br>Platforms
-        </a>
-        
-        <a class="card" href="browse.html?type=developers">
-        🏢<br><br>Developers
-        </a>
-        
-        <a class="card" href="browse.html?type=publishers">
-        📚<br><br>Publishers
-        </a>
-        
-        <a class="card" href="browse.html?type=genres">
-        🎲<br><br>Genres
-        </a>
-        
-        <a class="card" href="browse.html?type=franchises">
-        🧬<br><br>Franchises
-        </a>
-        
-        <a class="card" href="browse.html?type=years">
-        📅<br><br>Years
-        </a>
-        
-        </div>
-</div>
 
-<div id="results"></div>
+        <a class="card" href="browse.html?type=games">🎮<br><br>Games</a>
+        <a class="card" href="browse.html?type=platforms">🕹<br><br>Platforms</a>
+        <a class="card" href="browse.html?type=developers">🏢<br><br>Developers</a>
+        <a class="card" href="browse.html?type=publishers">📚<br><br>Publishers</a>
+        <a class="card" href="browse.html?type=genres">🎲<br><br>Genres</a>
+        <a class="card" href="browse.html?type=franchises">🧬<br><br>Franchises</a>
+        <a class="card" href="browse.html?type=years">📅<br><br>Years</a>
+
+    </div>
+</div>
 
 <script>
 let database = null;
 
+const input = document.getElementById("searchInput");
+const resultsBox = document.getElementById("searchResults");
+
+/* -----------------------------
+   LOAD DATABASE
+----------------------------- */
 fetch("database.json")
     .then(res => res.json())
     .then(data => {
@@ -193,10 +160,11 @@ fetch("database.json")
         renderStats(data);
     });
 
+/* -----------------------------
+   STATS
+----------------------------- */
 function renderStats(data) {
-    const stats = document.getElementById("stats");
-
-    stats.innerHTML = `
+    document.getElementById("stats").innerHTML = `
         <div class="stat-box">Games<br><strong>${data.games.length}</strong></div>
         <div class="stat-box">Platforms<br><strong>${data.platforms.length}</strong></div>
         <div class="stat-box">Developers<br><strong>${data.developers.length}</strong></div>
@@ -206,102 +174,70 @@ function renderStats(data) {
     `;
 }
 
-document.getElementById("search").addEventListener("input", function(e) {
-    const query = e.target.value.toLowerCase();
-    const results = document.getElementById("results");
-
-    if (!database || query.length < 2) {
-        results.innerHTML = "";
-        return;
-    }
-
-    let db = null;
-
-fetch("database.json")
-.then(res => res.json())
-.then(data => {
-    db = data;
-});
-
-const input = document.getElementById("searchInput");
-const resultsBox = document.getElementById("searchResults");
-
+/* -----------------------------
+   SEARCH LOGIC
+----------------------------- */
 input.addEventListener("input", () => {
 
     const query = input.value.toLowerCase().trim();
 
-    if (!query || !db) {
+    if (!database || query.length < 2) {
         resultsBox.style.display = "none";
         return;
     }
 
     const results = [];
 
-    // --------------------
-    // SEARCH GAMES
-    // --------------------
-    db.games.forEach(g => {
+    /* GAMES */
+    database.games.forEach(g => {
         if (g.title.toLowerCase().includes(query)) {
             results.push({
                 type: "game",
                 name: g.title,
-                id: g.id,
                 link: `game.html?id=${g.id}`
             });
         }
     });
 
-    // --------------------
-    // DEVELOPERS
-    // --------------------
-    db.developers.forEach(d => {
+    /* DEVELOPERS */
+    database.developers.forEach(d => {
         if (d.name.toLowerCase().includes(query)) {
             results.push({
                 type: "developer",
                 name: d.name,
-                id: d.id,
                 link: `entity.html?type=developer&id=${d.id}`
             });
         }
     });
 
-    // --------------------
-    // PUBLISHERS
-    // --------------------
-    db.publishers.forEach(p => {
+    /* PUBLISHERS */
+    database.publishers.forEach(p => {
         if (p.name.toLowerCase().includes(query)) {
             results.push({
                 type: "publisher",
                 name: p.name,
-                id: p.id,
                 link: `entity.html?type=publisher&id=${p.id}`
             });
         }
     });
 
-    // --------------------
-    // FRANCHISES
-    // --------------------
-    db.franchises.forEach(f => {
+    /* FRANCHISES */
+    database.franchises.forEach(f => {
         if (f.name.toLowerCase().includes(query)) {
             results.push({
                 type: "franchise",
                 name: f.name,
-                id: f.id,
                 link: `entity.html?type=franchise&id=${f.id}`
             });
         }
     });
 
-    // --------------------
-    // PLATFORMS
-    // --------------------
-    db.platforms.forEach(p => {
+    /* PLATFORMS */
+    database.platforms.forEach(p => {
         if (p.name.toLowerCase().includes(query)) {
             results.push({
                 type: "platform",
                 name: p.name,
-                id: p.id,
                 link: `entity.html?type=platform&id=${p.id}`
             });
         }
@@ -310,10 +246,12 @@ input.addEventListener("input", () => {
     renderResults(results.slice(0, 10));
 });
 
-
+/* -----------------------------
+   RENDER RESULTS
+----------------------------- */
 function renderResults(results) {
 
-    if (results.length === 0) {
+    if (!results.length) {
         resultsBox.style.display = "none";
         return;
     }
@@ -321,12 +259,20 @@ function renderResults(results) {
     resultsBox.style.display = "block";
 
     resultsBox.innerHTML = results.map(r => `
-        <a href="${r.link}" class="search-item">
+        <a class="search-item" href="${r.link}">
             <div class="search-category">${r.type}</div>
             <div>${r.name}</div>
         </a>
     `).join("");
 }
+
+/* -----------------------------
+   CLICK OUTSIDE TO CLOSE
+----------------------------- */
+document.addEventListener("click", (e) => {
+    if (!document.querySelector(".search-wrapper").contains(e.target)) {
+        resultsBox.style.display = "none";
+    }
 });
 </script>
 
