@@ -1,3 +1,13 @@
+const typeIcons = {
+    games: "🎮",
+    platforms: "🕹",
+    developers: "🏢",
+    publishers: "📚",
+    genres: "🎲",
+    franchises: "🧬",
+    years: "📅"
+};
+
 const params = new URLSearchParams(window.location.search);
 
 const type = params.get("type");
@@ -17,9 +27,9 @@ fetch("./database.json")
 
     }
 
-    title.textContent =
-        type.charAt(0).toUpperCase() +
-        type.slice(1);
+    const icon = typeIcons[type] || "";
+    
+    title.textContent = `${icon} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
 
     count.textContent =
         database[type].length + " items";
