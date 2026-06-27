@@ -24,13 +24,45 @@
         font-size: 32px;
     }
 
-    #search {
-        margin-top: 15px;
-        width: 60%;
-        padding: 10px;
-        font-size: 16px;
-        border-radius: 6px;
+    .search-wrapper {
+        position: relative;
+        max-width: 600px;
+        margin: auto;
+    }
+    
+    #searchInput {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
         border: none;
+        font-size: 16px;
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 45px;
+        left: 0;
+        right: 0;
+        background: #1f1f2b;
+        border-radius: 8px;
+        overflow: hidden;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .search-item {
+        padding: 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #2a2a3a;
+    }
+    
+    .search-item:hover {
+        background: #2b2b3d;
+    }
+    
+    .search-category {
+        font-size: 12px;
+        opacity: 0.6;
     }
 
     .stats {
@@ -183,39 +215,118 @@ document.getElementById("search").addEventListener("input", function(e) {
         return;
     }
 
-    let matches = [];
+    let db = null;
 
-    // Search games
-    database.games.forEach(game => {
-        if (game.title.toLowerCase().includes(query)) {
-            matches.push(`🎮 ${game.title}`);
+fetch("database.json")
+.then(res => res.json())
+.then(data => {
+    db = data;
+});
+
+const input = document.getElementById("searchInput");
+const resultsBox = document.getElementById("searchResults");
+
+input.addEventListener("input", () => {
+
+    const query = input.value.toLowerCase().trim();
+
+    if (!query || !db) {
+        resultsBox.style.display = "none";
+        return;
+    }
+
+    const results = [];
+
+    // --------------------
+    // SEARCH GAMES
+    // --------------------
+    db.games.forEach(g => {
+        if (g.title.toLowerCase().includes(query)) {
+            results.push({
+                type: "game",
+                name: g.title,
+                id: g.id,
+                link: `game.html?id=${g.id}`
+            });
         }
     });
 
-    // Search developers
-    database.developers.forEach(dev => {
-        if (dev.name.toLowerCase().includes(query)) {
-            matches.push(`🏢 ${dev.name}`);
+    // --------------------
+    // DEVELOPERS
+    // --------------------
+    db.developers.forEach(d => {
+        if (d.name.toLowerCase().includes(query)) {
+            results.push({
+                type: "developer",
+                name: d.name,
+                id: d.id,
+                link: `entity.html?type=developer&id=${d.id}`
+            });
         }
     });
 
-    // Search platforms
-    database.platforms.forEach(p => {
+    // --------------------
+    // PUBLISHERS
+    // --------------------
+    db.publishers.forEach(p => {
         if (p.name.toLowerCase().includes(query)) {
-            matches.push(`🕹 ${p.name}`);
+            results.push({
+                type: "publisher",
+                name: p.name,
+                id: p.id,
+                link: `entity.html?type=publisher&id=${p.id}`
+            });
         }
     });
 
-    // Search franchises
-    database.franchises.forEach(f => {
+    // --------------------
+    // FRANCHISES
+    // --------------------
+    db.franchises.forEach(f => {
         if (f.name.toLowerCase().includes(query)) {
-            matches.push(`📚 ${f.name}`);
+            results.push({
+                type: "franchise",
+                name: f.name,
+                id: f.id,
+                link: `entity.html?type=franchise&id=${f.id}`
+            });
         }
     });
 
-    results.innerHTML = matches.slice(0, 20)
-        .map(m => `<div class="result-item">${m}</div>`)
-        .join("");
+    // --------------------
+    // PLATFORMS
+    // --------------------
+    db.platforms.forEach(p => {
+        if (p.name.toLowerCase().includes(query)) {
+            results.push({
+                type: "platform",
+                name: p.name,
+                id: p.id,
+                link: `entity.html?type=platform&id=${p.id}`
+            });
+        }
+    });
+
+    renderResults(results.slice(0, 10));
+});
+
+
+function renderResults(results) {
+
+    if (results.length === 0) {
+        resultsBox.style.display = "none";
+        return;
+    }
+
+    resultsBox.style.display = "block";
+
+    resultsBox.innerHTML = results.map(r => `
+        <a href="${r.link}" class="search-item">
+            <div class="search-category">${r.type}</div>
+            <div>${r.name}</div>
+        </a>
+    `).join("");
+}
 });
 </script>
 
