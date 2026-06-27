@@ -42,10 +42,13 @@ fetch("./database.json")
 
         if (type === "games") {
 
-            div.innerHTML =
-                `<a href="game.html?id=${item.id}">
-                    ${item.title}
-                </a>`;
+            div.innerHTML = `
+                <a href="game.html?id=${item.id}">${item.title}</a>
+            
+                <div class="meta">
+                    🎲 ${item.genre || "Unknown"} · 🏢 ${item.developer || "Unknown"} · 📅 ${item.year || "?"}
+                </div>
+            `;
 
         }
 
