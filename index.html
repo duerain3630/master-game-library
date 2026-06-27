@@ -1,5 +1,195 @@
-<h1>My Game Library</h1>
-<div id="gameGrid"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Video Game Database</title>
 
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-<script src="script.js"></script>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0f0f14;
+        color: #ffffff;
+    }
+
+    header {
+        padding: 30px;
+        text-align: center;
+        background: #1a1a24;
+    }
+
+    h1 {
+        margin: 0;
+        font-size: 32px;
+    }
+
+    #search {
+        margin-top: 15px;
+        width: 60%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+    }
+
+    .stats {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
+        flex-wrap: wrap;
+    }
+
+    .stat-box {
+        background: #1f1f2b;
+        padding: 15px 20px;
+        border-radius: 10px;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .section {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        padding: 20px;
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .card {
+        background: #1f1f2b;
+        padding: 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+        text-decoration: none;
+        color: white;
+    }
+
+    .card:hover {
+        background: #2a2a3a;
+        transform: translateY(-2px);
+    }
+
+    #results {
+        max-width: 900px;
+        margin: auto;
+        padding: 10px;
+    }
+
+    .result-item {
+        background: #1f1f2b;
+        margin: 5px 0;
+        padding: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .result-item:hover {
+        background: #2a2a3a;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎮 My Video Game Database</h1>
+    <input id="search" placeholder="Search games, developers, platforms..." />
+</header>
+
+<div class="stats" id="stats"></div>
+
+<div class="section">
+    <h2>Browse</h2>
+
+    <div class="grid">
+        <div class="card">🎮 Games</div>
+        <div class="card">🕹 Platforms</div>
+        <div class="card">🏢 Developers</div>
+        <div class="card">📚 Publishers</div>
+        <div class="card">🎲 Genres</div>
+        <div class="card">🧬 Franchises</div>
+        <div class="card">📅 Years</div>
+    </div>
+</div>
+
+<div id="results"></div>
+
+<script>
+let database = null;
+
+fetch("database.json")
+    .then(res => res.json())
+    .then(data => {
+        database = data;
+        renderStats(data);
+    });
+
+function renderStats(data) {
+    const stats = document.getElementById("stats");
+
+    stats.innerHTML = `
+        <div class="stat-box">Games<br><strong>${data.games.length}</strong></div>
+        <div class="stat-box">Platforms<br><strong>${data.platforms.length}</strong></div>
+        <div class="stat-box">Developers<br><strong>${data.developers.length}</strong></div>
+        <div class="stat-box">Publishers<br><strong>${data.publishers.length}</strong></div>
+        <div class="stat-box">Franchises<br><strong>${data.franchises.length}</strong></div>
+        <div class="stat-box">Genres<br><strong>${data.genres.length}</strong></div>
+    `;
+}
+
+document.getElementById("search").addEventListener("input", function(e) {
+    const query = e.target.value.toLowerCase();
+    const results = document.getElementById("results");
+
+    if (!database || query.length < 2) {
+        results.innerHTML = "";
+        return;
+    }
+
+    let matches = [];
+
+    // Search games
+    database.games.forEach(game => {
+        if (game.title.toLowerCase().includes(query)) {
+            matches.push(`🎮 ${game.title}`);
+        }
+    });
+
+    // Search developers
+    database.developers.forEach(dev => {
+        if (dev.name.toLowerCase().includes(query)) {
+            matches.push(`🏢 ${dev.name}`);
+        }
+    });
+
+    // Search platforms
+    database.platforms.forEach(p => {
+        if (p.name.toLowerCase().includes(query)) {
+            matches.push(`🕹 ${p.name}`);
+        }
+    });
+
+    // Search franchises
+    database.franchises.forEach(f => {
+        if (f.name.toLowerCase().includes(query)) {
+            matches.push(`📚 ${f.name}`);
+        }
+    });
+
+    results.innerHTML = matches.slice(0, 20)
+        .map(m => `<div class="result-item">${m}</div>`)
+        .join("");
+});
+</script>
+
+</body>
+</html>
