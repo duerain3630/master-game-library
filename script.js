@@ -5,12 +5,16 @@ Papa.parse("data/game_database_master_final.csv", {
   header: true,
   skipEmptyLines: true,
   complete: function(results) {
-    const games = results.data;
-    console.log("Games loaded:", games);
+    console.log("CSV loaded:", results.data.length, results.data);
 
     const grid = document.getElementById("gameGrid");
 
-    games.forEach(game => {
+    if (!grid) {
+      console.error("Could not find #gameGrid");
+      return;
+    }
+
+    results.data.forEach(game => {
       const card = document.createElement("div");
       card.className = "game-card";
 
@@ -22,5 +26,8 @@ Papa.parse("data/game_database_master_final.csv", {
 
       grid.appendChild(card);
     });
+  },
+  error: function(error) {
+    console.error("CSV loading error:", error);
   }
 });
