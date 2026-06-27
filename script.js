@@ -5,3 +5,5 @@ Papa.parse("data/game_database_master_final.csv", {
     console.log(results.data);
   }
 });
+
+console.log("script.js loaded");
