@@ -1,1 +1,18 @@
+#gameGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
 
+.game-card {
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.cover-placeholder {
+  height: 200px;
+  background: #eee;
+  border-radius: 8px;
+}
