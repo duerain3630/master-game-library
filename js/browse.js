@@ -9,22 +9,60 @@ const typeIcons = {
 };
 
 const params = new URLSearchParams(window.location.search);
-
 const type = params.get("type");
 
+let database = null;
+let filteredData = [];
+
+// DOM elements
+const list = document.getElementById("list");
+const title = document.getElementById("pageTitle");
+const count = document.getElementById("itemCount");
+
+// Filters (only exist on games page)
+const genreFilter = document.getElementById("genreFilter");
+const developerFilter = document.getElementById("developerFilter");
+const yearFilter = document.getElementById("yearFilter");
+
+// -----------------------------
+// LOAD DATABASE
+// -----------------------------
 fetch("./database.json")
-.then(response => response.json())
-.then(database => {
+    .then(res => res.json())
+    .then(data => {
 
-    const title = document.getElementById("pageTitle");
-    const count = document.getElementById("itemCount");
-    const list = document.getElementById("list");
+        database = data;
 
-    const genreFilter = document.getElementById("genreFilter");
-    const developerFilter = document.getElementById("developerFilter");
-    const yearFilter = document.getElementById("yearFilter");
+        if (!database[type]) {
+            title.textContent = "Not Found";
+            return;
+        }
+
+        setupPage();
+        renderList(database[type]);
+
+    });
+
+// -----------------------------
+// PAGE SETUP
+// -----------------------------
+function setupPage() {
+
+    const icon = typeIcons[type] || "";
+    title.textContent = `${icon} ${capitalize(type)}`;
+
+    filteredData = database[type];
+    count.textContent = `${filteredData.length} items`;
 
     if (type === "games") {
+        setupFilters();
+    }
+}
+
+// -----------------------------
+// FILTER SETUP (GAMES ONLY)
+// -----------------------------
+function setupFilters() {
 
     const genres = new Set();
     const devs = new Set();
@@ -36,54 +74,93 @@ fetch("./database.json")
         if (g.year) years.add(g.year);
     });
 
-    genres.forEach(g => genreFilter.innerHTML += `<option>${g}</option>`);
-    devs.forEach(d => developerFilter.innerHTML += `<option>${d}</option>`);
-    years.forEach(y => yearFilter.innerHTML += `<option>${y}</option>`);
-    }    
-    
-    if (!database[type]) {
+    populateFilter(genreFilter, genres);
+    populateFilter(developerFilter, devs);
+    populateFilter(yearFilter, years);
 
-        title.textContent = "Not Found";
-        return;
+    genreFilter.addEventListener("change", applyFilters);
+    developerFilter.addEventListener("change", applyFilters);
+    yearFilter.addEventListener("change", applyFilters);
+}
 
-    }
+// -----------------------------
+// FILTER LOGIC
+// -----------------------------
+function applyFilters() {
 
-    const icon = typeIcons[type] || "";
-    
-    title.textContent = `${icon} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+    const genre = genreFilter.value;
+    const dev = developerFilter.value;
+    const year = yearFilter.value;
 
-    count.textContent =
-        database[type].length + " items";
+    filteredData = database.games.filter(g => {
 
-    database[type].forEach(item => {
+        return (
+            (genre === "all" || g.genre === genre) &&
+            (dev === "all" || g.developer === dev) &&
+            (year === "all" || g.year === year)
+        );
+
+    });
+
+    renderList(filteredData);
+}
+
+// -----------------------------
+// RENDER LIST
+// -----------------------------
+function renderList(data) {
+
+    list.innerHTML = "";
+    count.textContent = `${data.length} items`;
+
+    data.forEach(item => {
 
         const div = document.createElement("div");
-
         div.className = "browse-item";
 
         if (type === "games") {
 
             div.innerHTML = `
-                <a href="game.html?id=${item.id}">${item.title}</a>
-            
+                <a href="game.html?id=${item.id}">
+                    ${item.title}
+                </a>
+
                 <div class="meta">
-                    🎲 ${item.genre || "Unknown"} · 🏢 ${item.developer || "Unknown"} · 📅 ${item.year || "?"}
+                    🎲 ${item.genre || "Unknown"} · 
+                    🏢 ${item.developer || "Unknown"} · 
+                    📅 ${item.year || "?"}
                 </div>
             `;
 
-        }
+        } else {
 
-        else {
-
-            div.innerHTML =
-                `<a href="entity.html?type=${type.slice(0,-1)}&id=${item.id}">
+            div.innerHTML = `
+                <a href="entity.html?type=${type.slice(0,-1)}&id=${item.id}">
                     ${item.name || item.year}
-                </a>`;
-
+                </a>
+            `;
         }
 
         list.appendChild(div);
-
     });
+}
 
-});
+// -----------------------------
+// FILTER HELPERS
+// -----------------------------
+function populateFilter(select, values) {
+
+    if (!select) return;
+
+    select.innerHTML = `<option value="all">All</option>`;
+
+    Array.from(values)
+        .sort()
+        .forEach(v => {
+            select.innerHTML += `<option value="${v}">${v}</option>`;
+        });
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
