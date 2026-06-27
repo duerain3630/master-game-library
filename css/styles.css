@@ -83,6 +83,20 @@ a {
     color: white;
 }
 
+#alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+#alphabet a {
+    color: #7ab7ff;
+    text-decoration: none;
+    font-size: 12px;
+}
+
 </style>
 </head>
 
