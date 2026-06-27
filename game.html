@@ -121,59 +121,13 @@ function findById(list, id) {
 }
 
 function renderGame(id) {
+
     const game = database.games.find(g => g.id === id);
     const container = document.getElementById("content");
 
     if (!game) {
-
-        container.innerHTML = `
-            <div class="hero">
-        
-                <div class="cover">
-                    <img src="${game.cover || 'https://via.placeholder.com/264x374?text=No+Cover'}" />
-                </div>
-        
-                <div class="hero-info">
-        
-                    <h1>${game.title}</h1>
-        
-                    <div class="meta-line">
-                        <span><strong>Developer:</strong> ${developer ? developer.name : "Unknown"}</span>
-                        <span><strong>Publisher:</strong> ${publisher ? publisher.name : "Unknown"}</span>
-                    </div>
-        
-                    <div class="meta-line">
-                        <span><strong>Franchise:</strong> ${franchise ? franchise.name : "None"}</span>
-                        <span><strong>Genre:</strong> ${genre ? genre.name : "Unknown"}</span>
-                    </div>
-        
-                </div>
-        
-            </div>
-        
-            <div class="section">
-                <h3>Platforms</h3>
-                <div class="grid">
-                    ${game.platforms.map(p => `<div class="tag">${p}</div>`).join("")}
-                </div>
-            </div>
-        
-            <div class="section">
-                <h3>Releases</h3>
-                <div class="grid">
-                    ${releases.map(r => `
-                        <div class="tag">
-                            ${r.platform || "unknown"} - ${r.year || "?"}
-                        </div>
-                    `).join("")}
-                </div>
-            </div>
-        
-            <div class="section">
-                <h3>Related Games</h3>
-                ${getRelatedGames(game)}
-            </div>
-        `;
+        container.innerHTML = "<h2>Game not found</h2>";
+        return;
     }
 
     const developer = database.developers.find(d => d.id === game.developer);
@@ -184,14 +138,28 @@ function renderGame(id) {
     const releases = database.releases.filter(r => r.game === game.id);
 
     container.innerHTML = `
-        <h1>${game.title}</h1>
+        <div class="hero">
 
-        <div class="section">
-            <h3>Metadata</h3>
-            <p><strong>Developer:</strong> ${developer ? `<a href="#">${developer.name}</a>` : "Unknown"}</p>
-            <p><strong>Publisher:</strong> ${publisher ? `<a href="#">${publisher.name}</a>` : "Unknown"}</p>
-            <p><strong>Franchise:</strong> ${franchise ? `<a href="#">${franchise.name}</a>` : "None"}</p>
-            <p><strong>Genre:</strong> ${genre ? `<a href="#">${genre.name}</a>` : "Unknown"}</p>
+            <div class="cover">
+                <img src="${game.cover || 'https://via.placeholder.com/264x374?text=No+Cover'}" />
+            </div>
+
+            <div class="hero-info">
+
+                <h1>${game.title}</h1>
+
+                <div class="meta-line">
+                    <span><strong>Developer:</strong> ${developer ? developer.name : "Unknown"}</span>
+                    <span><strong>Publisher:</strong> ${publisher ? publisher.name : "Unknown"}</span>
+                </div>
+
+                <div class="meta-line">
+                    <span><strong>Franchise:</strong> ${franchise ? franchise.name : "None"}</span>
+                    <span><strong>Genre:</strong> ${genre ? genre.name : "Unknown"}</span>
+                </div>
+
+            </div>
+
         </div>
 
         <div class="section">
