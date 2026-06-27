@@ -68,6 +68,21 @@ a {
     margin-top: 5px;
 }
 
+#filters {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+#filters select {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    background: #1f1f2b;
+    color: white;
+}
+
 </style>
 </head>
 
