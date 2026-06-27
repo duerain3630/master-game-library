@@ -75,6 +75,45 @@ fetch("database.json")
         `).join("")}
     `;
 });
+
+main{
+
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+
+}
+
+#itemCount{
+
+    margin-bottom:20px;
+    opacity:.7;
+
+}
+
+.browse-item{
+
+    background:#1f1f2b;
+    margin:8px 0;
+    padding:14px;
+    border-radius:8px;
+
+}
+
+.browse-item:hover{
+
+    background:#2b2b3d;
+
+}
+
+.browse-item a{
+
+    color:white;
+    text-decoration:none;
+    display:block;
+
+}
+          
 </script>
 
 </body>
