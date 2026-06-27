@@ -35,6 +35,39 @@ a {
     color: #7ab7ff;
     text-decoration: none;
 }
+
+#pageTitle {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.browse-item {
+    background: #1f1f2b;
+    padding: 14px 16px;
+    margin: 10px 0;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.browse-item:hover {
+    background: #2a2a3a;
+    transform: translateY(-2px);
+}
+
+.browse-item a {
+    color: white;
+    font-size: 16px;
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+}
+
+.meta {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
 </style>
 </head>
 
