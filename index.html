@@ -145,11 +145,20 @@
 </div>
 
 <script>
+    
 let database = null;
 
 const input = document.getElementById("searchInput");
 const resultsBox = document.getElementById("searchResults");
-
+const typeIcons = {
+    game: "🎮 Game",
+    developer: "🏢 Developer",
+    publisher: "📚 Publisher",
+    franchise: "🧬 Franchise",
+    platform: "🕹 Platform"
+    
+};
+    
 /* -----------------------------
    LOAD DATABASE
 ----------------------------- */
@@ -243,7 +252,7 @@ input.addEventListener("input", () => {
         }
     });
 
-    renderResults(results.slice(0, 10));
+    renderResults(results);
 });
 
 /* -----------------------------
@@ -258,12 +267,44 @@ function renderResults(results) {
 
     resultsBox.style.display = "block";
 
-    resultsBox.innerHTML = results.map(r => `
-        <a class="search-item" href="${r.link}">
-            <div class="search-category">${r.type}</div>
-            <div>${r.name}</div>
-        </a>
-    `).join("");
+    const groups = {
+        game: [],
+        developer: [],
+        publisher: [],
+        franchise: [],
+        platform: []
+    };
+
+    results.forEach(r => {
+        if (groups[r.type]) {
+            groups[r.type].push(r);
+        }
+    });
+
+    resultsBox.innerHTML = `
+        ${renderGroup("🎮 Games", groups.game)}
+        ${renderGroup("🏢 Developers", groups.developer)}
+        ${renderGroup("📚 Publishers", groups.publisher)}
+        ${renderGroup("🧬 Franchises", groups.franchise)}
+        ${renderGroup("🕹 Platforms", groups.platform)}
+    `;
+}
+
+function renderGroup(title, items) {
+
+    if (!items.length) return "";
+
+    return `
+        <div style="padding:8px 10px; font-size:12px; opacity:0.6;">
+            ${typeIcons[title.split(" ")[1]?.toLowerCase()] || title}
+        </div>
+
+        ${items.map(r => `
+            <a class="search-item" href="${r.link}">
+                <div>${r.name}</div>
+            </a>
+        `).join("")}
+    `;
 }
 
 /* -----------------------------
