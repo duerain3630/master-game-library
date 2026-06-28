@@ -144,30 +144,15 @@ function renderList(data) {
    ALPHABET NAVIGATION
 ----------------------------- */
 function renderAlphabetNav() {
-    const existing = document.getElementById("alphabet-nav");
-    if (existing) existing.remove();
+
+    const alphabetContainer = document.getElementById("alphabet");
+    alphabetContainer.innerHTML = "";
 
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
 
-    const nav = document.createElement("div");
-    nav.id = "alphabet-nav";
-    nav.style = `
-        display:flex;
-        flex-wrap:wrap;
-        gap:8px;
-        justify-content:center;
-        margin:10px 0 20px;
-    `;
-
-    alphabet.forEach(l => {
-        nav.innerHTML += `
-            <a href="#letter-${l}" style="color:#7ab7ff; text-decoration:none;">
-                ${l}
-            </a>
-        `;
-    });
-
-    list.parentNode.insertBefore(nav, list);
+    alphabetContainer.innerHTML = alphabet.map(letter => {
+        return `<a href="#letter-${letter}">${letter}</a>`;
+    }).join("");
 }
 
 /* -----------------------------
