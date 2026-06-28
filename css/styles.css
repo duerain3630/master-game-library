@@ -1,13 +1,13 @@
 body {
     font-family: Arial;
-    background: ##57575a;
+    background: #ababac;
     color: white;
     margin: 0;
 }
 
 header {
     padding: 20px;
-    background: #75757b;
+    background: #8c8c91;
 }
 
 .container {
@@ -96,7 +96,17 @@ header {
     flex-wrap: wrap;
     gap: 8px;
     justify-content: center;
+
     margin: 10px 0 20px;
+    padding: 8px 10px;
+
+    background: #1a1a24;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    border-bottom: 1px solid #2a2a3a;
 }
 
 #alphabet a {
@@ -108,5 +118,5 @@ header {
 }
 
 #alphabet a:hover {
-    background: #1f1f2b;
+    background: #2a2a3a;
 }
