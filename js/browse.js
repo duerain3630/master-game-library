@@ -134,20 +134,25 @@ function renderList(data) {
 
     let currentLetter = "";
 
-    data.forEach(item => {
-
-        const name = item.title || item.name || "Unknown";
-        const letter = type === "games" ? getLetter(name) : null;
-
-        if (letter !== currentLetter) {
-            currentLetter = letter;
-
-            const heading = document.createElement("div");
-            heading.className = "letter-heading";
-            heading.id = `letter-${letter}`;
-            heading.innerHTML = `<h2>${letter}</h2>`;
-            list.appendChild(heading);
-        }
+   data.forEach(item => {
+   
+       const name = item.title || item.name || "Unknown";
+   
+       let letter = null;
+   
+       if (type === "games") {
+           letter = getLetter(name);
+   
+           if (letter !== currentLetter) {
+               currentLetter = letter;
+   
+               const heading = document.createElement("div");
+               heading.className = "letter-heading";
+               heading.id = `letter-${letter}`;
+               heading.innerHTML = `<h2>${letter}</h2>`;
+               list.appendChild(heading);
+           }
+       }
 
         const link =
             type === "games"
@@ -175,7 +180,9 @@ function renderList(data) {
         list.appendChild(div);
     });
 
+    if (type === "games") {
     renderAlphabetNav();
+}
 }
 
 /* -----------------------------
