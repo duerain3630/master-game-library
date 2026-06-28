@@ -31,6 +31,10 @@ fetch("./database.json")
         setupPage(type);
         setupFilters();
         applyFilters();
+
+       document.getElementById("app").style.visibility = "visible";
+       document.getElementById("loading").style.display = "none";
+       document.getElementById("app").style.display = "block";
     });
 
 /* -----------------------------
