@@ -1,8 +1,7 @@
 const params = new URLSearchParams(window.location.search);
-const type = params.get("type");
+const type = params.get("type") || "games";
 
 let database = null;
-let filteredData = [];
 
 /* -----------------------------
    DOM
@@ -17,29 +16,22 @@ const developerFilter = document.getElementById("developerFilter");
 const yearFilter = document.getElementById("yearFilter");
 
 /* -----------------------------
-   LOAD DATA
+   LOAD DATABASE
 ----------------------------- */
 fetch("./database.json")
     .then(res => res.json())
     .then(db => {
-
         database = db;
 
-        const params = new URLSearchParams(window.location.search);
-        const type = params.get("type") || "games";
-
-        setupPage(type);
+        setupPage();
         setupFilters();
-        applyFilters();
-
-       document.getElementById("loading").style.display = "none";
-       document.getElementById("app").style.display = "block";
+        renderList(database[type] || []);
     });
 
 /* -----------------------------
    PAGE SETUP
 ----------------------------- */
-function setupPage(type) {
+function setupPage() {
 
     const iconMap = {
         games: "🎮",
@@ -51,18 +43,16 @@ function setupPage(type) {
         years: "📅"
     };
 
-    const icon = iconMap[type] || "📁";
-
-    document.getElementById("pageTitle").textContent =
-        `${icon} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-
-    filteredData = database.games;
+    title.textContent = `${iconMap[type] || "📁"} ${capitalize(type)}`;
 }
 
 /* -----------------------------
-   FILTER SETUP
+   FILTER SETUP (ONLY GAMES)
 ----------------------------- */
 function setupFilters() {
+
+    if (type !== "games") return;
+
     const genres = new Set();
     const publishers = new Set();
     const developers = new Set();
@@ -90,12 +80,15 @@ function setupFilters() {
    FILTER LOGIC
 ----------------------------- */
 function applyFilters() {
+
+    if (type !== "games") return;
+
     const genre = genreFilter.value;
     const pub = publisherFilter.value;
     const dev = developerFilter.value;
     const year = yearFilter.value;
 
-    filteredData = database.games.filter(g => {
+    const filtered = database.games.filter(g => {
         return (
             (genre === "all" || g.genre === genre) &&
             (pub === "all" || g.publisher === pub) &&
@@ -104,13 +97,14 @@ function applyFilters() {
         );
     });
 
-    renderList(filteredData);
+    renderList(filtered);
 }
 
 /* -----------------------------
-   RENDER LIST (A–Z GROUPED)
+   RENDER LIST + ALPHABET
 ----------------------------- */
 function renderList(data) {
+
     list.innerHTML = "";
 
     if (!data.length) {
@@ -119,15 +113,20 @@ function renderList(data) {
         return;
     }
 
-    // sort alphabetically
-    data.sort((a, b) => a.title.localeCompare(b.title));
-
     count.textContent = `${data.length} items`;
+
+    data.sort((a, b) => {
+        const aName = a.title || a.name || "";
+        const bName = b.title || b.name || "";
+        return aName.localeCompare(bName);
+    });
 
     let currentLetter = "";
 
-    data.forEach(game => {
-        const letter = getLetter(game.title);
+    data.forEach(item => {
+
+        const name = item.title || item.name || "Unknown";
+        const letter = getLetter(name);
 
         if (letter !== currentLetter) {
             currentLetter = letter;
@@ -139,20 +138,27 @@ function renderList(data) {
             list.appendChild(heading);
         }
 
+        const link =
+            type === "games"
+                ? `game.html?id=${item.id}`
+                : `entity.html?type=${type.slice(0, -1)}&id=${item.id}`;
+
         const div = document.createElement("div");
         div.className = "browse-item";
 
         div.innerHTML = `
-            <a href="game.html?id=${game.id}">
-                ${game.title}
+            <a href="${link}">
+                ${name}
             </a>
 
-            <div class="meta">
-                🎲 ${getName(database.genres, game.genre)} ·
-                🏢 ${getName(database.developers, game.developer)} ·
-                📚 ${getName(database.publishers, game.publisher)} ·
-                📅 ${getYear(game)}
-            </div>
+            ${type === "games" ? `
+                <div class="meta">
+                    🎲 ${getName(database.genres, item.genre)} ·
+                    🏢 ${getName(database.developers, item.developer)} ·
+                    📚 ${getName(database.publishers, item.publisher)} ·
+                    📅 ${getYear(item)}
+                </div>
+            ` : ""}
         `;
 
         list.appendChild(div);
@@ -162,24 +168,27 @@ function renderList(data) {
 }
 
 /* -----------------------------
-   ALPHABET NAVIGATION
+   ALPHABET NAV
 ----------------------------- */
 function renderAlphabetNav() {
 
-    const alphabetContainer = document.getElementById("alphabet");
-    alphabetContainer.innerHTML = "";
+    const alphabet = document.getElementById("alphabet");
+    if (!alphabet) return;
 
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
 
-    alphabetContainer.innerHTML = alphabet.map(letter => {
-        return `<a href="#letter-${letter}">${letter}</a>`;
-    }).join("");
+    alphabet.innerHTML = letters
+        .map(l => `<a href="#letter-${l}">${l}</a>`)
+        .join("");
 }
 
 /* -----------------------------
    HELPERS
 ----------------------------- */
 function populateFilter(select, values) {
+
+    if (!select) return;
+
     select.innerHTML = `<option value="all">All</option>`;
 
     Array.from(values)
@@ -208,4 +217,8 @@ function getYear(game) {
 function getLetter(title) {
     const first = title.trim()[0].toUpperCase();
     return /[A-Z]/.test(first) ? first : "#";
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
