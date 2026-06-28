@@ -132,10 +132,10 @@ function renderList(data) {
                     ${item.title}
                 </a>
 
-                <div class="meta">
-                    🎲 ${item.genre || "Unknown"} · 
-                    🏢 ${item.developer || "Unknown"} · 
-                    📚 ${item.publisher || "Unknown"} · 
+                <<div class="meta">
+                    🎲 ${getEntityName("genres", item.genre)} ·
+                    🏢 ${getEntityName("developers", item.developer)} ·
+                    📚 ${getEntityName("publishers", item.publisher)} ·
                     📅 ${getYear(item)}
                 </div>
             `;
@@ -189,4 +189,26 @@ function getYear(game) {
     }
 
     return "?";
+}
+
+function getEntityName(type, id) {
+
+    if (!id) return "Unknown";
+
+    const entity = database[type].find(e => e.id === id);
+
+    return entity ? entity.name : id;
+}
+
+function getYear(game) {
+
+    if (!game.releases || game.releases.length === 0)
+        return "?";
+
+    // Use the first release ID
+    const releaseId = game.releases[0];
+
+    const release = database.releases.find(r => r.id === releaseId);
+
+    return release ? release.year : "?";
 }
