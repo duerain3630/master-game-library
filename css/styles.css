@@ -1,13 +1,13 @@
 body {
     font-family: Arial;
-    background: #0f0f14;
+    background: ##57575a;
     color: white;
     margin: 0;
 }
 
 header {
     padding: 20px;
-    background: #1a1a24;
+    background: #75757b;
 }
 
 .container {
