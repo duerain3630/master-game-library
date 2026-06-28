@@ -20,10 +20,33 @@ const title = document.getElementById("pageTitle");
 const count = document.getElementById("itemCount");
 
 // Filters (only exist on games page)
-const genreFilter = document.getElementById("genreFilter");
-const publisherFilter = document.getElementById("publisherFilter");
-const developerFilter = document.getElementById("developerFilter");
-const yearFilter = document.getElementById("yearFilter");
+database.genres.forEach(g => {
+    genreFilter.innerHTML += `
+        <option value="${g.id}">
+            ${g.name}
+        </option>`;
+});
+
+database.publishers.forEach(p => {
+    publisherFilter.innerHTML += `
+        <option value="${p.id}">
+            ${p.name}
+        </option>`;
+});
+
+database.developers.forEach(d => {
+    developerFilter.innerHTML += `
+        <option value="${d.id}">
+            ${d.name}
+        </option>`;
+});
+
+database.years.forEach(y => {
+    yearFilter.innerHTML += `
+        <option value="${y.year}">
+            ${y.year}
+        </option>`;
+});
 
 // -----------------------------
 // LOAD DATABASE
