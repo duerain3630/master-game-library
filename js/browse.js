@@ -35,10 +35,9 @@ const yearFilter = document.getElementById("yearFilter");
 
         database = data;
 
-        filteredData = database.games; // IMPORTANT
-
-        setupFilters(); // if you have it
-        renderList(filteredData); // IMPORTANT (initial render)
+        setupPage();
+        
+        renderList(filteredData);
 
         const count = document.getElementById("itemCount");
         count.textContent = `${filteredData.length} items`;
@@ -68,13 +67,18 @@ function setupFilters() {
     const genres = new Set();
     const publishers = new Set();
     const devs = new Set();
-    const year = getYear(g, database);
+    const years = new Set();
 
     database.games.forEach(g => {
+
         if (g.genre) genres.add(g.genre);
         if (g.publisher) publishers.add(g.publisher);
         if (g.developer) devs.add(g.developer);
-        if (year !== "Unknown") years.add(year);
+
+        const year = getYear(g, database);
+        if (year !== "Unknown") {
+            years.add(year);
+        }
     });
 
     populateFilter(genreFilter, genres, "genres");
@@ -139,9 +143,9 @@ function renderList(data) {
             </a>
 
             <div class="meta">
-                🎲 ${item.genre || "Unknown"} ·
-                🏢 ${item.developer || "Unknown"} ·
-                📚 ${item.publisher || "Unknown"} ·
+                🎲 ${getEntityName("genres", item.genre)} ·
+                🏢 ${getEntityName("developers", item.developer)} ·
+                📚 ${getEntityName("publishers", item.publisher)} ·
                 📅 ${getYear(item, database)}
             </div>
         `;
