@@ -1,89 +1,62 @@
-const typeIcons = {
-    games: "🎮",
-    platforms: "🕹",
-    developers: "🏢",
-    publishers: "📚",
-    genres: "🎲",
-    franchises: "🧬",
-    years: "📅"
-};
-
 const params = new URLSearchParams(window.location.search);
 const type = params.get("type");
 
 let database = null;
 let filteredData = [];
 
-// DOM elements
+/* -----------------------------
+   DOM
+----------------------------- */
 const list = document.getElementById("list");
 const title = document.getElementById("pageTitle");
 const count = document.getElementById("itemCount");
 
-// Filters (only exist on games page)
 const genreFilter = document.getElementById("genreFilter");
 const publisherFilter = document.getElementById("publisherFilter");
 const developerFilter = document.getElementById("developerFilter");
 const yearFilter = document.getElementById("yearFilter");
 
-// -----------------------------
-// LOAD DATABASE
-// -----------------------------
-
-    fetch("./database.json")
+/* -----------------------------
+   LOAD DATA
+----------------------------- */
+fetch("./database.json")
     .then(res => res.json())
-    .then(data => {
+    .then(db => {
+        database = db;
 
-        database = data;
+        if (!database.games) return;
 
         setupPage();
-        
-        renderList(filteredData);
-
-        const count = document.getElementById("itemCount");
-        count.textContent = `${filteredData.length} items`;
+        setupFilters();
+        applyFilters(); // initial render
     });
 
-// -----------------------------
-// PAGE SETUP
-// -----------------------------
+/* -----------------------------
+   PAGE SETUP
+----------------------------- */
 function setupPage() {
-
-    const icon = typeIcons[type] || "";
-    title.textContent = `${icon} ${capitalize(type)}`;
-
-    filteredData = database[type];
-    count.textContent = `${filteredData.length} items`;
-
-    if (type === "games") {
-        setupFilters();
-    }
+    title.textContent = "🎮 Games";
 }
 
-// -----------------------------
-// FILTER SETUP
-// -----------------------------
+/* -----------------------------
+   FILTER SETUP
+----------------------------- */
 function setupFilters() {
-
     const genres = new Set();
     const publishers = new Set();
-    const devs = new Set();
+    const developers = new Set();
     const years = new Set();
 
     database.games.forEach(g => {
-
         if (g.genre) genres.add(g.genre);
         if (g.publisher) publishers.add(g.publisher);
-        if (g.developer) devs.add(g.developer);
-
-        const year = getYear(g, database);
-        if (year !== "Unknown") {
-            years.add(year);
-        }
+        if (g.developer) developers.add(g.developer);
+        if (getYear(g)) years.add(getYear(g));
     });
 
-    populateFilter(genreFilter, genres, "genres");
-    populateFilter(publisherFilter, publishers, "publishers");
-    populateFilter(developerFilter, devs, "developers");
+    populateFilter(genreFilter, genres);
+    populateFilter(publisherFilter, publishers);
+    populateFilter(developerFilter, developers);
     populateFilter(yearFilter, years);
 
     genreFilter.addEventListener("change", applyFilters);
@@ -92,120 +65,141 @@ function setupFilters() {
     yearFilter.addEventListener("change", applyFilters);
 }
 
-// -----------------------------
-// FILTER LOGIC
-// -----------------------------
+/* -----------------------------
+   FILTER LOGIC
+----------------------------- */
 function applyFilters() {
-
     const genre = genreFilter.value;
     const pub = publisherFilter.value;
     const dev = developerFilter.value;
     const year = yearFilter.value;
 
     filteredData = database.games.filter(g => {
-
-        const matchesYear =
-            (year === "all" || getYear(g, database) === year);
-
         return (
             (genre === "all" || g.genre === genre) &&
             (pub === "all" || g.publisher === pub) &&
             (dev === "all" || g.developer === dev) &&
-            matchesYear
+            (year === "all" || getYear(g) === year)
         );
     });
 
     renderList(filteredData);
 }
 
-// -----------------------------
-// RENDER LIST
-// -----------------------------
+/* -----------------------------
+   RENDER LIST (A–Z GROUPED)
+----------------------------- */
 function renderList(data) {
-
-    const list = document.getElementById("list");
-
     list.innerHTML = "";
 
-    if (!data || data.length === 0) {
+    if (!data.length) {
         list.innerHTML = "<p>No results found.</p>";
+        count.textContent = "0 items";
         return;
     }
 
-    data.forEach(item => {
+    // sort alphabetically
+    data.sort((a, b) => a.title.localeCompare(b.title));
+
+    count.textContent = `${data.length} items`;
+
+    let currentLetter = "";
+
+    data.forEach(game => {
+        const letter = getLetter(game.title);
+
+        if (letter !== currentLetter) {
+            currentLetter = letter;
+
+            const heading = document.createElement("div");
+            heading.className = "letter-heading";
+            heading.id = `letter-${letter}`;
+            heading.innerHTML = `<h2>${letter}</h2>`;
+            list.appendChild(heading);
+        }
 
         const div = document.createElement("div");
         div.className = "browse-item";
 
         div.innerHTML = `
-            <a href="game.html?id=${item.id}">
-                ${item.title}
+            <a href="game.html?id=${game.id}">
+                ${game.title}
             </a>
 
             <div class="meta">
-                🎲 ${getEntityName("genres", item.genre)} ·
-                🏢 ${getEntityName("developers", item.developer)} ·
-                📚 ${getEntityName("publishers", item.publisher)} ·
-                📅 ${getYear(item, database)}
+                🎲 ${getName(database.genres, game.genre)} ·
+                🏢 ${getName(database.developers, game.developer)} ·
+                📚 ${getName(database.publishers, game.publisher)} ·
+                📅 ${getYear(game)}
             </div>
         `;
 
         list.appendChild(div);
     });
+
+    renderAlphabetNav();
 }
 
-// -----------------------------
-// FILTER HELPERS
-// -----------------------------
-function populateFilter(select, values, entityType = null) {
+/* -----------------------------
+   ALPHABET NAVIGATION
+----------------------------- */
+function renderAlphabetNav() {
+    const existing = document.getElementById("alphabet-nav");
+    if (existing) existing.remove();
 
-    if (!select) return;
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
 
+    const nav = document.createElement("div");
+    nav.id = "alphabet-nav";
+    nav.style = `
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        justify-content:center;
+        margin:10px 0 20px;
+    `;
+
+    alphabet.forEach(l => {
+        nav.innerHTML += `
+            <a href="#letter-${l}" style="color:#7ab7ff; text-decoration:none;">
+                ${l}
+            </a>
+        `;
+    });
+
+    list.parentNode.insertBefore(nav, list);
+}
+
+/* -----------------------------
+   HELPERS
+----------------------------- */
+function populateFilter(select, values) {
     select.innerHTML = `<option value="all">All</option>`;
 
     Array.from(values)
         .sort()
         .forEach(v => {
-
-            let label = v;
-
-            if (entityType && database[entityType]) {
-                const entity = database[entityType].find(e => e.id === v);
-                if (entity) label = entity.name;
-            }
-
-            select.innerHTML += `
-                <option value="${v}">
-                    ${label}
-                </option>
-            `;
+            select.innerHTML += `<option value="${v}">${v}</option>`;
         });
 }
 
-// -----------------------------
-// UTILITIES
-// -----------------------------
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+function getName(list, id) {
+    const item = list.find(x => x.id === id);
+    return item ? item.name : "Unknown";
 }
 
-function getEntityName(type, id) {
-
-    if (!id) return "Unknown";
-
-    const entity = database[type].find(e => e.id === id);
-    return entity ? entity.name : id;
-}
-
-function getYear(game, db) {
-    if (game.year) {
-        return String(game.year).replace(".0", "");
-    }
+function getYear(game) {
+    if (game.year) return String(game.year);
 
     if (game.releases?.length) {
-        const release = db.releases.find(r => r.id === game.releases[0]);
-        if (release?.year) return String(release.year);
+        const rel = database.releases.find(r => r.id === game.releases[0]);
+        if (rel?.year) return String(rel.year);
     }
 
     return "Unknown";
+}
+
+function getLetter(title) {
+    const first = title.trim()[0].toUpperCase();
+    return /[A-Z]/.test(first) ? first : "#";
 }
