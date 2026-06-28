@@ -95,7 +95,10 @@ function applyFilters() {
     const genre = genreFilter.value;
     const pub = publisherFilter.value;
     const dev = developerFilter.value;
-    const year = yearFilter.value;
+    const matchesYear =
+    year === "all" ||
+    (g.releases && database.releases
+        .find(r => r.id === g.releases[0])?.year == year);
 
     filteredData = database.games.filter(g => {
 
@@ -103,8 +106,9 @@ function applyFilters() {
             (genre === "all" || g.genre === genre) &&
             (pub === "all" || g.publisher === pub) &&
             (dev === "all" || g.developer === dev) &&
-            (year === "all" || g.year === year)
+            matchesYear
         );
+        
     });
 
     renderList(filteredData);
