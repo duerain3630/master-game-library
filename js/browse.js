@@ -28,19 +28,20 @@ const yearFilter = document.getElementById("yearFilter");
 // -----------------------------
 // LOAD DATABASE
 // -----------------------------
-fetch("./database.json")
+
+    fetch("./database.json")
     .then(res => res.json())
     .then(data => {
 
         database = data;
 
-        if (!database[type]) {
-            title.textContent = "Not Found";
-            return;
-        }
+        filteredData = database.games; // IMPORTANT
 
-        setupPage();
-        renderList(database[type]);
+        setupFilters(); // if you have it
+        renderList(filteredData); // IMPORTANT (initial render)
+
+        const count = document.getElementById("itemCount");
+        count.textContent = `${filteredData.length} items`;
     });
 
 // -----------------------------
@@ -118,37 +119,32 @@ function applyFilters() {
 // -----------------------------
 function renderList(data) {
 
+    const list = document.getElementById("list");
+
     list.innerHTML = "";
-    count.textContent = `${data.length} items`;
+
+    if (!data || data.length === 0) {
+        list.innerHTML = "<p>No results found.</p>";
+        return;
+    }
 
     data.forEach(item => {
 
         const div = document.createElement("div");
         div.className = "browse-item";
 
-        if (type === "games") {
+        div.innerHTML = `
+            <a href="game.html?id=${item.id}">
+                ${item.title}
+            </a>
 
-            div.innerHTML = `
-                <a href="game.html?id=${item.id}">
-                    ${item.title}
-                </a>
-
-                <div class="meta">
-                    🎲 ${getEntityName("genres", item.genre)} ·
-                    🏢 ${getEntityName("developers", item.developer)} ·
-                    📚 ${getEntityName("publishers", item.publisher)} ·
-                    📅 ${getYear(item)}
-                </div>
-            `;
-
-        } else {
-
-            div.innerHTML = `
-                <a href="entity.html?type=${type.slice(0, -1)}&id=${item.id}">
-                    ${item.name || item.year}
-                </a>
-            `;
-        }
+            <div class="meta">
+                🎲 ${item.genre || "Unknown"} ·
+                🏢 ${item.developer || "Unknown"} ·
+                📚 ${item.publisher || "Unknown"} ·
+                📅 ${getYear(item, database)}
+            </div>
+        `;
 
         list.appendChild(div);
     });
