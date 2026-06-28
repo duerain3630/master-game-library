@@ -68,28 +68,21 @@ a {
     margin-top: 5px;
 }
 
-.filters {
+#filters {
     display: flex;
-    gap: 15px;
     justify-content: center;
+    gap: 12px;
     flex-wrap: wrap;
-    margin: 15px 0;
+    margin: 20px 0;
 }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    color: white;
-    font-size: 12px;
-}
-
-.filter-group select {
-    padding: 8px;
-    border-radius: 6px;
-    border: none;
+#filters select {
     background: #1f1f2b;
     color: white;
+    border: 1px solid #2a2a3a;
+    padding: 8px 10px;
+    border-radius: 8px;
+    min-width: 160px;
 }
 
 #alphabet {
