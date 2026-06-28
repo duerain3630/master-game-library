@@ -20,33 +20,10 @@ const title = document.getElementById("pageTitle");
 const count = document.getElementById("itemCount");
 
 // Filters (only exist on games page)
-database.genres.forEach(g => {
-    genreFilter.innerHTML += `
-        <option value="${g.id}">
-            ${g.name}
-        </option>`;
-});
-
-database.publishers.forEach(p => {
-    publisherFilter.innerHTML += `
-        <option value="${p.id}">
-            ${p.name}
-        </option>`;
-});
-
-database.developers.forEach(d => {
-    developerFilter.innerHTML += `
-        <option value="${d.id}">
-            ${d.name}
-        </option>`;
-});
-
-database.years.forEach(y => {
-    yearFilter.innerHTML += `
-        <option value="${y.year}">
-            ${y.year}
-        </option>`;
-});
+const genreFilter = document.getElementById("genreFilter");
+const publisherFilter = document.getElementById("publisherFilter");
+const developerFilter = document.getElementById("developerFilter");
+const yearFilter = document.getElementById("yearFilter");
 
 // -----------------------------
 // LOAD DATABASE
@@ -64,7 +41,6 @@ fetch("./database.json")
 
         setupPage();
         renderList(database[type]);
-
     });
 
 // -----------------------------
@@ -84,7 +60,7 @@ function setupPage() {
 }
 
 // -----------------------------
-// FILTER SETUP (GAMES ONLY)
+// FILTER SETUP
 // -----------------------------
 function setupFilters() {
 
@@ -100,9 +76,9 @@ function setupFilters() {
         if (g.year) years.add(g.year);
     });
 
-    populateFilter(genreFilter, genres);
-    populateFilter(publisherFilter, publishers);
-    populateFilter(developerFilter, devs);
+    populateFilter(genreFilter, genres, "genres");
+    populateFilter(publisherFilter, publishers, "publishers");
+    populateFilter(developerFilter, devs, "developers");
     populateFilter(yearFilter, years);
 
     genreFilter.addEventListener("change", applyFilters);
@@ -129,7 +105,6 @@ function applyFilters() {
             (dev === "all" || g.developer === dev) &&
             (year === "all" || g.year === year)
         );
-
     });
 
     renderList(filteredData);
@@ -155,7 +130,7 @@ function renderList(data) {
                     ${item.title}
                 </a>
 
-                <<div class="meta">
+                <div class="meta">
                     🎲 ${getEntityName("genres", item.genre)} ·
                     🏢 ${getEntityName("developers", item.developer)} ·
                     📚 ${getEntityName("publishers", item.publisher)} ·
@@ -166,7 +141,7 @@ function renderList(data) {
         } else {
 
             div.innerHTML = `
-                <a href="entity.html?type=${type.slice(0,-1)}&id=${item.id}">
+                <a href="entity.html?type=${type.slice(0, -1)}&id=${item.id}">
                     ${item.name || item.year}
                 </a>
             `;
@@ -179,7 +154,7 @@ function renderList(data) {
 // -----------------------------
 // FILTER HELPERS
 // -----------------------------
-function populateFilter(select, values) {
+function populateFilter(select, values, entityType = null) {
 
     if (!select) return;
 
@@ -188,30 +163,27 @@ function populateFilter(select, values) {
     Array.from(values)
         .sort()
         .forEach(v => {
-            select.innerHTML += `<option value="${v}">${v}</option>`;
+
+            let label = v;
+
+            if (entityType && database[entityType]) {
+                const entity = database[entityType].find(e => e.id === v);
+                if (entity) label = entity.name;
+            }
+
+            select.innerHTML += `
+                <option value="${v}">
+                    ${label}
+                </option>
+            `;
         });
 }
 
+// -----------------------------
+// UTILITIES
+// -----------------------------
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function getYear(game) {
-
-    // If year exists directly
-    if (game.year) return game.year;
-
-    // fallback: try releases
-    if (game.releases && database.releases) {
-
-        const release = database.releases.find(r => r.game === game.id);
-
-        if (release && release.year) {
-            return release.year;
-        }
-    }
-
-    return "?";
 }
 
 function getEntityName(type, id) {
@@ -219,7 +191,6 @@ function getEntityName(type, id) {
     if (!id) return "Unknown";
 
     const entity = database[type].find(e => e.id === id);
-
     return entity ? entity.name : id;
 }
 
@@ -228,9 +199,7 @@ function getYear(game) {
     if (!game.releases || game.releases.length === 0)
         return "?";
 
-    // Use the first release ID
     const releaseId = game.releases[0];
-
     const release = database.releases.find(r => r.id === releaseId);
 
     return release ? release.year : "?";
