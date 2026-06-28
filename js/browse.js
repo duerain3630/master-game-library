@@ -26,12 +26,17 @@ fetch("./database.json")
 
         setupPage();
 
-        if (type === "games" && letter !== currentLetter) {
+        // ONLY run filters on games page
+        if (type === "games") {
             setupFilters();
             renderList(database.games);
         } else {
             renderList(database[type] || []);
         }
+    })
+    .catch(err => {
+        console.error("Database load error:", err);
+        list.innerHTML = "<p>Error loading data</p>";
     });
 
 /* -----------------------------
