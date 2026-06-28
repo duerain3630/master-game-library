@@ -84,24 +84,29 @@ header {
     opacity: 0.8;
 }
 
-/* ALPHABET (if used later) */
-#alphabet {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 10px;
-}
-
-#alphabet a {
-    color: #7ab7ff;
-    text-decoration: none;
-    font-size: 12px;
-}
-
 .letter-heading {
     margin: 20px 0 10px;
     padding: 5px 0;
     border-bottom: 1px solid #2a2a3a;
     color: white;
+}
+
+#alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 10px 0 20px;
+}
+
+#alphabet a {
+    color: #7ab7ff;
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+#alphabet a:hover {
+    background: #1f1f2b;
 }
