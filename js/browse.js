@@ -67,13 +67,13 @@ function setupFilters() {
     const genres = new Set();
     const publishers = new Set();
     const devs = new Set();
-    const years = new Set();
+    const year = getYear(g, database);
 
     database.games.forEach(g => {
         if (g.genre) genres.add(g.genre);
         if (g.publisher) publishers.add(g.publisher);
         if (g.developer) devs.add(g.developer);
-        if (g.year) years.add(g.year);
+        if (year !== "Unknown") years.add(year);
     });
 
     populateFilter(genreFilter, genres, "genres");
@@ -95,12 +95,12 @@ function applyFilters() {
     const genre = genreFilter.value;
     const pub = publisherFilter.value;
     const dev = developerFilter.value;
-    const matchesYear =
-    year === "all" ||
-    (g.releases && database.releases
-        .find(r => r.id === g.releases[0])?.year == year);
+    const year = yearFilter.value;
 
     filteredData = database.games.filter(g => {
+
+        const matchesYear =
+            (year === "all" || getYear(g, database) === year);
 
         return (
             (genre === "all" || g.genre === genre) &&
@@ -108,7 +108,6 @@ function applyFilters() {
             (dev === "all" || g.developer === dev) &&
             matchesYear
         );
-        
     });
 
     renderList(filteredData);
@@ -198,13 +197,15 @@ function getEntityName(type, id) {
     return entity ? entity.name : id;
 }
 
-function getYear(game) {
+function getYear(game, db) {
+    if (game.year) {
+        return String(game.year).replace(".0", "");
+    }
 
-    if (!game.releases || game.releases.length === 0)
-        return "?";
+    if (game.releases?.length) {
+        const release = db.releases.find(r => r.id === game.releases[0]);
+        if (release?.year) return String(release.year);
+    }
 
-    const releaseId = game.releases[0];
-    const release = database.releases.find(r => r.id === releaseId);
-
-    return release ? release.year : "?";
+    return "Unknown";
 }
