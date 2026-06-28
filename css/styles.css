@@ -98,3 +98,10 @@ header {
     text-decoration: none;
     font-size: 12px;
 }
+
+.letter-heading {
+    margin: 20px 0 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #2a2a3a;
+    color: white;
+}
