@@ -22,20 +22,38 @@ const yearFilter = document.getElementById("yearFilter");
 fetch("./database.json")
     .then(res => res.json())
     .then(db => {
+
         database = db;
 
-        if (!database.games) return;
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get("type") || "games";
 
-        setupPage();
+        setupPage(type);
         setupFilters();
-        applyFilters(); // initial render
+        applyFilters();
     });
 
 /* -----------------------------
    PAGE SETUP
 ----------------------------- */
-function setupPage() {
-    title.textContent = "🎮 Games";
+function setupPage(type) {
+
+    const iconMap = {
+        games: "🎮",
+        platforms: "🕹",
+        developers: "🏢",
+        publishers: "📚",
+        genres: "🎲",
+        franchises: "🧬",
+        years: "📅"
+    };
+
+    const icon = iconMap[type] || "📁";
+
+    document.getElementById("pageTitle").textContent =
+        `${icon} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+    filteredData = database.games;
 }
 
 /* -----------------------------
