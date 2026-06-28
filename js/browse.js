@@ -135,7 +135,8 @@ function renderList(data) {
                 <div class="meta">
                     🎲 ${item.genre || "Unknown"} · 
                     🏢 ${item.developer || "Unknown"} · 
-                    📅 ${item.year || "?"}
+                    📚 ${item.publisher || "Unknown"} · 
+                    📅 ${getYear(item)}
                 </div>
             `;
 
@@ -170,4 +171,22 @@ function populateFilter(select, values) {
 
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function getYear(game) {
+
+    // If year exists directly
+    if (game.year) return game.year;
+
+    // fallback: try releases
+    if (game.releases && database.releases) {
+
+        const release = database.releases.find(r => r.game === game.id);
+
+        if (release && release.year) {
+            return release.year;
+        }
+    }
+
+    return "?";
 }
