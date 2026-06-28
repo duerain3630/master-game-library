@@ -21,11 +21,17 @@ const yearFilter = document.getElementById("yearFilter");
 fetch("./database.json")
     .then(res => res.json())
     .then(db => {
+
         database = db;
 
         setupPage();
-        setupFilters();
-        renderList(database[type] || []);
+
+        if (type === "games" && letter !== currentLetter) {
+            setupFilters();
+            renderList(database.games);
+        } else {
+            renderList(database[type] || []);
+        }
     });
 
 /* -----------------------------
@@ -107,7 +113,7 @@ function renderList(data) {
 
     list.innerHTML = "";
 
-    if (!data.length) {
+    if (!data || data.length === 0) {
         list.innerHTML = "<p>No results found.</p>";
         count.textContent = "0 items";
         return;
@@ -126,7 +132,7 @@ function renderList(data) {
     data.forEach(item => {
 
         const name = item.title || item.name || "Unknown";
-        const letter = getLetter(name);
+        const letter = type === "games" ? getLetter(name) : null;
 
         if (letter !== currentLetter) {
             currentLetter = letter;
